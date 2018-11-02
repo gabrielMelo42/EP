@@ -3,71 +3,79 @@
 #include <stdbool.h>
 
 typedef struct no{
-	int tipo;/*1= elemento; 2=sublista*/
-	union{
-		int chave;//tipo1
-		struct no* sublista;//tipo2
-	};
-	struct no* prox;
+    int tipo;
+    union{
+        int chave;
+        struct no* sublista;
+    };
+    struct no* prox;
 } NO;
 
+void exibir(NO* p);
+NO* tirarNoVazio(NO* entrada);
+NO* listarChaves(NO* entrada);
+
 void exibir(NO* p){
-	if(p){
-		if(p->tipo==1)printf("%i\n", p->chave);
-		else exibir(p->sublista);
-		exibir(p->prox);
-	}
+    if(p){
+        if(p->tipo==1)printf("%i\n", p->chave);
+        else exibir(p->sublista);
+        exibir(p->prox);
+    }
 }
 
-void auxiliar(NO* ultimo, NO* ponteiroSub, NO* aux){
-    while(ultimo && ultimo->tipo!=2) ultimo=ultimo->prox; 
-        ponteiroSub=ultimo;//ate aqui vai pro NO vazio apos o 1
-        aux=ultimo;
-        while(ultimo && ultimo->prox) ultimo=ultimo->prox; //ponteiroSub ta na mesma; ultimo ta no 4
-        ultimo->prox=ponteiroSub;//4->prox=NO vazio sublista 1
-        ponteiroSub->prox=ponteiroSub->sublista;
+
+
+NO* tirarNoVazio(NO* entrada){
+    NO* p=entrada;
+    NO* ant=NULL;
+    NO* inicio=entrada;
+    while(p && p->tipo==2) p = p->prox;
+    inicio = p;
+    while(p){
+        if(p->tipo==2) {
+            if(ant) ant->prox=p->prox;
+            NO* atual=p;
+            if(p) p=p->prox;
+            free(atual);
+        }
+
+        if(p && p->tipo!=2) ant=p;
+        else{
+            while(p && p->tipo==2){
+            NO* atual=p;
+            if(p) p=p->prox;
+            if(ant) ant->prox=p;
+            free(atual);
+            }
+        }    
+       if(p) p=p->prox;
+    }
+
+    return inicio;
 }
 
 NO* listarChaves(NO* entrada){
-	NO* ponteiroSub=entrada;
-	NO* ultimo=entrada;
-    NO* aux=entrada;
+    NO* ponteiroSub=entrada;
+    NO* ponteiroUltimo=entrada;
 
-		while(ultimo && ultimo->tipo!=2) ultimo=ultimo->prox; 
-		ponteiroSub=ultimo;//ate aqui vai pro NO vazio apos o 1
-		aux=ultimo;
-        while(ultimo && ultimo->prox) ultimo=ultimo->prox; //ponteiroSub ta na mesma; ultimo ta no 4
-		ultimo->prox=ponteiroSub;//4->prox=NO vazio sublista 1
-        ponteiroSub->prox=ponteiroSub->sublista;//4->prox->prox=5
-        while(ultimo && ultimo->tipo!=2) ultimo=ultimo->prox; //agora ultimo esta no NO vazio apos 5 
-        ponteiroSub=ultimo;
-        ultimo=aux;
-        while(ultimo && ultimo->tipo!=2) ultimo=ultimo->prox; 
-        aux=ultimo;
-        ultimo->prox=ultimo->sublista;
-        ponteiroSub->prox=ultimo;
-        while(ultimo && ultimo->tipo!=2) ultimo=ultimo->prox;
-        ponteiroSub=ultimo;
-        while(ultimo && ultimo->prox) ultimo=ultimo->prox;
-        //entrada=entrada->prox;
-		//listarChaves(entrada);
-        exibir(entrada);
-		auxiliar(ultimo, ponteiroSub, aux);
-        return entrada;
-}
+    while(ponteiroUltimo && ponteiroUltimo->prox && ponteiroUltimo->tipo!=2) ponteiroUltimo=ponteiroUltimo->prox;
+    if(ponteiroUltimo->tipo==1) return entrada;
+    ponteiroSub=ponteiroUltimo;
+        
+   while(ponteiroSub){
+        while(ponteiroUltimo && ponteiroUltimo->prox) ponteiroUltimo=ponteiroUltimo->prox;
+        if(ponteiroSub && ponteiroSub->sublista) ponteiroUltimo->prox=ponteiroSub->sublista;
+        ponteiroSub=ponteiroSub->prox;
+        while(ponteiroSub && ponteiroSub->tipo!=2) ponteiroSub=ponteiroSub->prox;
+   } 
+   return tirarNoVazio(entrada);
+ }
 
-//    NO* ep(){
-  //  	NO* inicio;
-    //	NO* fim;
+int main(){
 
-
-    //}
-
-    int main(){
-
-	NO* p = (NO*) malloc(sizeof(NO));
-    p->tipo = 2;
-    p->sublista = NULL;
+    NO* p = (NO*) malloc(sizeof(NO));
+    p->tipo = 1;
+    p->chave = 0;
 
     NO* inicio = p;
     
@@ -208,12 +216,7 @@ NO* listarChaves(NO* entrada){
     sub7->tipo = 1;
     sub7->chave = 17;
     sub7->prox = NULL;
-
+    listarChaves(inicio);
     exibir(inicio);
-
-    NO* listarChaves(NO* inicio);
-    printf("");
-    printf("aqui eh a segunda vez\n");
-    //exibir(inicio);
     return 0;
 }
